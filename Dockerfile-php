@@ -1,0 +1,23 @@
+FROM php:7.2-fpm as builder
+
+RUN apt-get update && apt-get install -y \
+    libicu-dev \
+    libzip-dev \
+    git \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN docker-php-ext-install intl
+RUN docker-php-ext-install zip
+RUN pecl install mongodb && docker-php-ext-enable mongodb
+RUN curl https://raw.githubusercontent.com/composer/getcomposer.org/fe44bd5b10b89fbe7e7fc70e99e5d1a344a683dd/web/installer -o - -s | php -- --quiet --install-dir=/usr/local/bin --filename=composer
+
+# Prod
+FROM builder as prod
+COPY --chown=www-data:www-data api/ api/
+USER www-data
+
+# Dev
+FROM builder as dev
+RUN useradd -m developer -s /bin/bash -u 1000
+RUN pecl install xdebug
+USER developer

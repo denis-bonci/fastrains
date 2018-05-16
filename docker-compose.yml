@@ -1,0 +1,25 @@
+version: "3.4"
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile-php
+      target: prod
+    volumes:
+      - api-data:/var/www/html/api
+
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile-webserver
+    ports:
+      - "80:80"
+    volumes:
+      - api-data:/var/www/html/api
+
+  mongo:
+    image: mongo
+
+volumes:
+  api-data:
